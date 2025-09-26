@@ -1,6 +1,6 @@
 import numpy as np
 
-def sample_spiral_distribution(num_samples, num_turns=2, noise=0.5):
+def sample_spiral_distribution(num_samples: int, num_turns: float = 2, noise: float = 0.5):
     """
     Samples data points from a 2D spiral distribution.
     
