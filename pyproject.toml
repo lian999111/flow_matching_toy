@@ -1,0 +1,16 @@
+[project]
+name = "flow-matching-toy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
+]
+
+[[tool.uv.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu121"
