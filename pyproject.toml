@@ -11,6 +11,25 @@ dependencies = [
     "torchvision>=0.23.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+    "pytest-cov",
+]
+
 [[tool.uv.source]]
 name = "pytorch"
 url = "https://download.pytorch.org/whl/cu121"
+
+[tool.pytest.ini_options]
+# Specifies the directory where pytest will look for tests.
+testpaths = ["tests"]
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".pytest_cache",
+    ".venv",
+    "__pypackages__",
+]
