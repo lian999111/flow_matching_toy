@@ -27,6 +27,7 @@ url = "https://download.pytorch.org/whl/cu121"
 testpaths = ["tests"]
 
 [tool.ruff]
+line-length = 120
 exclude = [
     ".git",
     ".pytest_cache",
