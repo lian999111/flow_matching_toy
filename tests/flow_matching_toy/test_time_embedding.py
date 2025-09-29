@@ -33,7 +33,21 @@ def test_known_values_at_time_zero():
     # Expected pattern for t=0: sin(0)=0, cos(0)=1 -> [0, 1, 0, 1, ...]
     half_dim = embed_dim // 2
     expected_row = torch.cat([torch.zeros(half_dim), torch.ones(half_dim)])
-    expected_embedding = expected_row.repeat(batch_size, 1)
+    expected_embedding = expected_row.unsqueeze(0).expand((batch_size, -1))
     
     # Use torch.allclose for safe floating-point comparison
     assert torch.allclose(embedding, expected_embedding)
+
+def test_known_values_at_time_one():
+    """ Tests the output for the known edge case of t=1. """
+    batch_size = 2
+    embed_dim = 4
+    time = torch.ones(batch_size)
+    
+    embedding = get_time_embedding(embed_dim, time, max_position=10000)
+    
+    expected_row = torch.tensor([-0.3056, 0.8415, -0.9522, 0.5403])
+    expected_embedding = expected_row.unsqueeze(0).expand((batch_size, -1))
+    
+    # Use torch.allclose for safe floating-point comparison
+    assert torch.allclose(embedding, expected_embedding, atol=1e-3)
