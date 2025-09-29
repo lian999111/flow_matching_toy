@@ -9,6 +9,7 @@ dependencies = [
     "numpy",
     "torch>=2.8.0",
     "torchvision>=0.23.0",
+    "tqdm",
 ]
 
 [project.optional-dependencies]
