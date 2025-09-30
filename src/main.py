@@ -1,3 +1,7 @@
+"""Training and Inference playground."""
+
+# NOTE: This script uses vscode's interactive notebook feature that allows for cell-by-cell execution.
+
 # %%
 import torch
 import torch.nn.functional as F
@@ -7,7 +11,6 @@ import matplotlib.pyplot as plt
 
 from flow_matching_toy.data_sampler import sample_spiral_distribution
 from flow_matching_toy.model import MLP
-from flow_matching_toy.time_embedding import get_time_embedding
 
 # %%
 device = "cuda" if torch.cuda.is_available() else "cpu"
