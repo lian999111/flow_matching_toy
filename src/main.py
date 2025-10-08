@@ -10,7 +10,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 from flow_matching_toy.data_sampler import sample_spiral_distribution
-from flow_matching_toy.model import MLP
+from flow_matching_toy.models import MLP
 
 # %%
 device = "cuda" if torch.cuda.is_available() else "cpu"

@@ -1,6 +1,6 @@
 import torch
 
-from flow_matching_toy.model import MLP
+from flow_matching_toy.models import MLP
 
 
 class TestMLP:
