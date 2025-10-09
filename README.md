@@ -20,7 +20,7 @@ uv sync --all-extras
 ```bash
 uv install -e .
 ```
-* Run the script `flow_matching_toy/main.py`. It is recommended to run it in vscode's interactive mode to get a Jupyter-Notebook-like experience.
+* Run the script `flow_matching_toy/flow_matching_simple_distribution.py`. It is recommended to run it in vscode's interactive mode to get a Jupyter-Notebook-like experience.
 
 ### Run unit tests
 Pytest has been config in `pyproject.toml` and will be installed with the `--all-extras` arg when running `uv sync`. After that, simple run:
