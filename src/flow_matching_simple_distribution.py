@@ -1,4 +1,8 @@
-"""Training and Inference playground."""
+"""
+Script to train and inference a flow-matching model to, 
+given a sample from a Gaussian distribution, 
+generate a data sample in a spiral distribution.
+"""
 
 # NOTE: This script uses vscode's interactive notebook feature that allows for cell-by-cell execution.
 
