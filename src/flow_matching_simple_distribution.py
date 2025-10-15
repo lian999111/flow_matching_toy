@@ -1,6 +1,6 @@
 """
-Script to train and inference a flow-matching model to, 
-given a sample from a Gaussian distribution, 
+Script to train and inference a flow-matching model to,
+given a sample from a Gaussian distribution,
 generate a data sample in a spiral distribution.
 """
 
@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from flow_matching_toy.data_sampler import sample_spiral_distribution
+from flow_matching_toy.datasets import sample_spiral_distribution
 from flow_matching_toy.models import MLP
 
 # %%

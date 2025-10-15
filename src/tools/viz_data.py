@@ -1,5 +1,5 @@
 # %%
-from flow_matching_toy.data_sampler import sample_spiral_distribution
+from flow_matching_toy.datasets import sample_spiral_distribution
 
 import matplotlib.pyplot as plt
 
