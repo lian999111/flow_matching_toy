@@ -8,9 +8,10 @@ dependencies = [
     "hydra-core",
     "matplotlib",
     "numpy",
+    "pytorch-lightning",
+    "tensorboard",
     "torch>=2.8.0",
     "torchvision>=0.23.0",
-    "tqdm",
 ]
 
 [project.optional-dependencies]

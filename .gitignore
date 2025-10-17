@@ -9,3 +9,6 @@ data/
 
 # Virtual environments
 .venv
+
+# Pytorch lightning
+**lightning_logs
