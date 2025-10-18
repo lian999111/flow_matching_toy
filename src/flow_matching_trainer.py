@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch.nn import Module
 
 from flow_matching_toy.time_embedding import get_time_embedding
-from flow_matching_toy.datasets import get_fashion_mnist_dataloaders
+from dataset.datasets import get_fashion_mnist_dataloaders
 
 
 class FlowMatchingModel(pl.LightningModule):
@@ -17,6 +17,7 @@ class FlowMatchingModel(pl.LightningModule):
         config: dict,
     ):
         super().__init__()
+        self.save_hyperparameters()
         self.model = model
         self.condition_encoder = condition_encoder
         self.config = config
@@ -30,8 +31,8 @@ class FlowMatchingModel(pl.LightningModule):
         pred_velocity = self.model(x_t, cond_emb)
         return pred_velocity
 
-    def training_step(self, batch: Any, batch_idx: int):
-        """Train one step with each batch containing target and condition."""
+    def step(self, batch: Any):
+        """Compute the loss on one batch containing target and condition."""
         x_target, condition = batch
         batch_size = x_target.shape[0]
 
@@ -44,16 +45,28 @@ class FlowMatchingModel(pl.LightningModule):
 
         true_velocity = x_target - random_noise
         loss = F.mse_loss(true_velocity, pred_velocity)
+        return loss
+
+    def training_step(self, batch: Any, batch_idx: int):
+        """Train one step with each batch containing target and condition."""
+        # TODO: Add Classifier-Free Guidance
+        loss = self.step(batch)
         self.log("train_loss", loss, on_epoch=True)
         return loss
+
+    def validation_step(self, batch: Any, batch_idx: int):
+        """Validate one step with each batch containing target and condition."""
+        val_loss = self.step(batch)
+        self.log("val_loss", val_loss, on_epoch=True)
 
     def configure_optimizers(self):
         optim = torch.optim.AdamW(self.parameters(), lr=self.config["learning_rate"])
         return optim
 
+
 def train_flow_matching():
     """Train flow matching model."""
-    from flow_matching_toy.models import ConditionalUNet
+    from model.models import ConditionalUNet
     from torch.nn import Embedding
 
     model = ConditionalUNet(io_channels=1, cond_channels=32)
@@ -73,9 +86,11 @@ def train_flow_matching():
         config=config,
     )
 
-    trainer = pl.Trainer(max_epochs=1)
+    trainer = pl.Trainer(max_epochs=10)
     # trainer = pl.Trainer(overfit_batches=1, max_epochs=10, log_every_n_steps=1)
     trainer.fit(flow_match_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+
+    return flow_match_model
 
 
 if __name__ == "__main__":
