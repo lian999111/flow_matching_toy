@@ -1,6 +1,6 @@
 import torch
 
-from flow_matching_toy.time_embedding import get_time_embedding
+from flow_matching_toy.model.time_embedding import get_time_embedding
 
 
 def test_output_shape_even_dim():

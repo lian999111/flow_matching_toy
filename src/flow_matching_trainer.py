@@ -1,3 +1,4 @@
+# %%
 from typing import Any
 
 import pytorch_lightning as pl
@@ -5,8 +6,8 @@ import torch
 import torch.nn.functional as F
 from torch.nn import Module
 
-from flow_matching_toy.time_embedding import get_time_embedding
-from dataset.datasets import get_fashion_mnist_dataloaders
+from flow_matching_toy.model.time_embedding import get_time_embedding
+from flow_matching_toy.dataset.datasets import get_fashion_mnist_dataloaders
 
 
 class FlowMatchingModel(pl.LightningModule):
@@ -95,3 +96,22 @@ def train_flow_matching():
 
 if __name__ == "__main__":
     train_flow_matching()
+
+# # %% 
+# flow_match_model = FlowMatchingModel.load_from_checkpoint("/home/arry_iang/workspace/playground/flow_matching_toy/src/lightning_logs/version_6/checkpoints/epoch=9-step=37500.ckpt")
+
+# # %%
+# flow_match_model.eval()
+
+# import matplotlib.pyplot as plt
+# NUM_SAMPLES = 1
+# NUM_STEPS = 100
+# CONDITION = 5
+# x = torch.randn((NUM_SAMPLES, 1, 32, 32), device="cuda")
+# for t in torch.linspace(0, 1, NUM_STEPS, device="cuda"):
+#     t = t.expand((NUM_SAMPLES,))
+#     condition = torch.tensor((CONDITION,), dtype=int, device="cuda")
+#     flow = flow_match_model(x, condition, t)
+#     x += 1 / NUM_STEPS * flow
+
+# plt.imshow(x.cpu().detach()[0].permute(1, 2, 0))

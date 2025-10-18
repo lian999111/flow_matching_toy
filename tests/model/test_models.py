@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from flow_matching_toy.models import MLP, FiLMLayer, ConditionalResBlock, ConditionalUNet
+from flow_matching_toy.model.models import MLP, FiLMLayer, ConditionalResBlock, ConditionalUNet
 
 
 class TestMLP:
