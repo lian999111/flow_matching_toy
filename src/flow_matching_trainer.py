@@ -67,8 +67,8 @@ class FlowMatchingModel(pl.LightningModule):
 
 def train_flow_matching():
     """Train flow matching model."""
-    from model.models import ConditionalUNet
     from torch.nn import Embedding
+    from flow_matching_toy.model.unet import ConditionalUNet
 
     model = ConditionalUNet(io_channels=1, cond_channels=32)
     # Use a simple embedding layer as the encoder
