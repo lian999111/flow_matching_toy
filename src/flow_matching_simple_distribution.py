@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from flow_matching_toy.dataset.datasets import sample_spiral_distribution
+from flow_matching_toy.dataset.spiral_distribution import sample_spiral_distribution
 from flow_matching_toy.model.models import MLP
 
 # %%

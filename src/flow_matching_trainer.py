@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch.nn import Module
 
 from flow_matching_toy.model.time_embedding import get_time_embedding
-from flow_matching_toy.dataset.datasets import get_fashion_mnist_dataloaders
+from flow_matching_toy.dataset.fashion_mnist import get_fashion_mnist_dataloaders
 
 
 class FlowMatchingModel(pl.LightningModule):
@@ -97,7 +97,7 @@ def train_flow_matching():
 if __name__ == "__main__":
     train_flow_matching()
 
-# # %% 
+# # %%
 # flow_match_model = FlowMatchingModel.load_from_checkpoint("/home/arry_iang/workspace/playground/flow_matching_toy/src/lightning_logs/version_6/checkpoints/epoch=9-step=37500.ckpt")
 
 # # %%
