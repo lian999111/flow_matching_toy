@@ -1,12 +1,12 @@
 import pytest
 import torch
 
-from flow_matching_toy.model.models import MLP, FiLMLayer, ConditionalResBlock, ConditionalUNet
+from flow_matching_toy.model.models import ConditionalMLP, FiLMLayer, ConditionalResBlock, ConditionalUNet
 
 
-class TestMLP:
+class TestConditionalMLP:
     def test_output_shape(self):
-        model = MLP(in_channels=2, channels=16, time_emb_channels=8, layers=1)
+        model = ConditionalMLP(in_channels=2, channels=16, time_emb_channels=8, layers=1)
         batch_size = 4
         x = torch.rand((batch_size, 2))
         t = torch.rand((batch_size,))

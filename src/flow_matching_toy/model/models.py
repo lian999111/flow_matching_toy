@@ -16,7 +16,7 @@ class FCLayer(nn.Module):
         return F.relu(self.linear(x))
 
 
-class MLP(nn.Module):
+class ConditionalMLP(nn.Module):
     """A model that outputs a vector with same dimension as the input."""
 
     def __init__(self, in_channels: int = 2, channels: int = 128, time_emb_channels: int = 128, layers: int = 3):

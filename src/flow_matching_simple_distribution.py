@@ -14,13 +14,13 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 from flow_matching_toy.dataset.spiral_distribution import sample_spiral_distribution
-from flow_matching_toy.model.models import MLP
+from flow_matching_toy.model.models import ConditionalMLP
 
 # %%
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # %%
-model = MLP(in_channels=2, channels=256, time_emb_channels=128, layers=5).cuda()
+model = ConditionalMLP(in_channels=2, channels=256, time_emb_channels=128, layers=5).cuda()
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
 
 NUM_TRAIN_STEPS = 10000
