@@ -1,32 +1,52 @@
 # %%
-from typing import Any
+from typing import Any, Dict
 
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from torch.nn import Module
 
-from flow_matching_toy.model.time_encoder import get_time_embedding
+from flow_matching_toy.model import MODEL_REGISTRY
+from flow_matching_toy.model.time_encoder import SinusoidalTimeEncoder
 from flow_matching_toy.dataset.fashion_mnist import get_fashion_mnist_dataloaders
 
 
 class FlowMatchingModel(pl.LightningModule):
     def __init__(
         self,
-        model: Module,
-        condition_encoder: Module,
-        config: dict,
+        model_cfg: Dict[str, Any],
+        cond_encoder_cfg: Dict[str, Any],
+        time_encoder_cfg: Dict[str, Any],
+        learning_rate: float = 1e-3,
     ):
+        """
+        Args:
+            model_cfg (dict): Configuration dictionary for the main model.
+                              Must contain a 'name' key mapping to MODEL_REGISTRY
+                              and a 'params' key with a dict of model hyperparameters.
+            cond_encoder_cfg (dict): Configuration dictionary for the condition encoder.
+                                     Must contain a 'name' key mapping to
+                                     CONDITION_ENCODER_REGISTRY and a 'params' key.
+            learning_rate (float): The learning rate for the optimizer.
+        """
         super().__init__()
         self.save_hyperparameters()
-        self.model = model
-        self.condition_encoder = condition_encoder
-        self.config = config
+        # TODO: Make time encoder configurable
+        # self.time_encoder_cfg = self.hparams.time_encoder_cfg
+
+        model_name = model_cfg["name"]
+        model_params = model_cfg["params"]
+        if model_name not in MODEL_REGISTRY:
+            raise ValueError(f"Model '{model_name}' not found.")
+        self.model = MODEL_REGISTRY[model_name](**model_params)
+
+        # TODO: Enable choosing these encoder models
+        self.condition_encoder = torch.nn.Embedding(**cond_encoder_cfg)
+        self.time_encoder = SinusoidalTimeEncoder(**time_encoder_cfg)
 
     def forward(self, x_t, condition, time):
         cond_emb = self.condition_encoder(condition)
         # TODO: Think of a better way to config this
-        time_emb = get_time_embedding(embedding_dim=self.config["cond_emb_dim"] / 2, time=time)
+        time_emb = self.time_encoder(time)
         # Include time embedding as part of condition embedding
         cond_emb = torch.cat([time_emb, cond_emb], dim=1)
         pred_velocity = self.model(x_t, cond_emb)
@@ -61,30 +81,37 @@ class FlowMatchingModel(pl.LightningModule):
         self.log("val_loss", val_loss, on_epoch=True)
 
     def configure_optimizers(self):
-        optim = torch.optim.AdamW(self.parameters(), lr=self.config["learning_rate"])
+        optim = torch.optim.AdamW(self.parameters(), lr=self.hparams.learning_rate)
         return optim
 
 
 def train_flow_matching():
     """Train flow matching model."""
-    from torch.nn import Embedding
-    from flow_matching_toy.model.unet import ConditionalUNet
-
-    model = ConditionalUNet(io_channels=1, cond_channels=32)
-    # Use a simple embedding layer as the encoder
-    cond_encoder = Embedding(num_embeddings=11, embedding_dim=16)
-
     train_loader, val_loader = get_fashion_mnist_dataloaders(batch_size=16, image_size=32, num_workers=4)
 
-    config = {
-        "cond_emb_dim": 32,
-        "learning_rate": 1e-3,
+    model_cfg = {
+        "name": "conditional_unet",
+        "params": {
+            "io_channels": 1,
+            "cond_channels": 32,  # 16 for class condition, 16 for time
+        },
     }
 
+    cond_encoder_cfg = {
+        "num_embeddings": 11,  # 10 for fashion-mnist and 1 for null (unconditional class)
+        "embedding_dim": 16,
+    }
+
+    time_encoder_cfg = {
+        "embedding_dim": 16,
+    }
+
+    assert (
+        model_cfg["params"]["cond_channels"] == cond_encoder_cfg["embedding_dim"] + time_encoder_cfg["embedding_dim"]
+    ), "Condition embedding dimensions don't match."
+
     flow_match_model = FlowMatchingModel(
-        model=model,
-        condition_encoder=cond_encoder,
-        config=config,
+        model_cfg=model_cfg, cond_encoder_cfg=cond_encoder_cfg, time_encoder_cfg=time_encoder_cfg, learning_rate=1e-3
     )
 
     trainer = pl.Trainer(max_epochs=10)

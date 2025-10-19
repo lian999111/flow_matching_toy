@@ -1,4 +1,5 @@
 import torch
+import pytest
 
 from flow_matching_toy.model.time_encoder import get_time_embedding
 

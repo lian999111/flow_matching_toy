@@ -1,6 +1,7 @@
 import math
 
 import torch
+import torch.nn as nn
 
 
 def get_time_embedding(embedding_dim: int, time: torch.Tensor, max_position: int = 10000):
@@ -20,6 +21,9 @@ def get_time_embedding(embedding_dim: int, time: torch.Tensor, max_position: int
     Returns:
         A 2D tensor of shape (B, embedding_dim) containing the time embeddings.
     """
+    # NOTE: We don't assert time is in [0, 1] since this might break when exporting the model to ONNX
+    # Instead, make sure the time is valid outside the mode whenever possible
+
     # Scale up time from [0, 1] to [0, max_position] since position embedding is designed to work with large position possibilities
     time = time * max_position
     half_dim = embedding_dim // 2
@@ -34,3 +38,24 @@ def get_time_embedding(embedding_dim: int, time: torch.Tensor, max_position: int
         embedding = torch.nn.functional.pad(embedding, (0, 1))
 
     return embedding
+
+
+class SinusoidalTimeEncoder(nn.Module):
+    """Time encoder for flow matching."""
+
+    def __init__(self, embedding_dim: int):
+        """
+        Args:
+            embedding_dim: The dimensionality of the output embedding vector.
+        """
+        super().__init__()
+        self.embedding_dim = embedding_dim
+
+    def forward(self, time: torch.Tensor):
+        """
+        Get sinusoidal time embedding.
+
+        Args:
+            time: Time in the range of [0, 1].
+        """
+        return get_time_embedding(self.embedding_dim, time)
