@@ -85,7 +85,7 @@ class FlowMatchingModel(pl.LightningModule):
         return optim
 
 
-def train_flow_matching():
+def train_flow_matching(debug=False):
     """Train flow matching model."""
     train_loader, val_loader = get_fashion_mnist_dataloaders(batch_size=16, image_size=32, num_workers=4)
 
@@ -114,15 +114,18 @@ def train_flow_matching():
         model_cfg=model_cfg, cond_encoder_cfg=cond_encoder_cfg, time_encoder_cfg=time_encoder_cfg, learning_rate=1e-3
     )
 
-    trainer = pl.Trainer(max_epochs=10)
-    # trainer = pl.Trainer(overfit_batches=1, max_epochs=10, log_every_n_steps=1)
+    if debug:
+        trainer = pl.Trainer(overfit_batches=1, max_epochs=10, log_every_n_steps=1)
+    else:
+        trainer = pl.Trainer(max_epochs=10)
+
     trainer.fit(flow_match_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 
     return flow_match_model
 
 
 if __name__ == "__main__":
-    train_flow_matching()
+    train_flow_matching(debug=True)
 
 # # %%
 # flow_match_model = FlowMatchingModel.load_from_checkpoint("/home/arry_iang/workspace/playground/flow_matching_toy/src/lightning_logs/version_6/checkpoints/epoch=9-step=37500.ckpt")
