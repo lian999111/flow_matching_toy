@@ -1,7 +1,7 @@
 import torch
 import pytest
 
-from flow_matching_toy.model.time_encoder import get_time_embedding
+from flow_matching_toy.model.time_encoder import SinusoidalTimeEncoder
 
 
 def test_output_shape_even_dim():
@@ -10,7 +10,8 @@ def test_output_shape_even_dim():
     embed_dim = 256
     time = torch.rand(batch_size)
 
-    embedding = get_time_embedding(embed_dim, time)
+    time_encoder = SinusoidalTimeEncoder(embed_dim)
+    embedding = time_encoder(time)
 
     assert embedding.shape == (batch_size, embed_dim)
 
@@ -21,7 +22,8 @@ def test_output_shape_odd_dim():
     embed_dim = 257
     time = torch.rand(batch_size)
 
-    embedding = get_time_embedding(embed_dim, time)
+    time_encoder = SinusoidalTimeEncoder(embed_dim)
+    embedding = time_encoder(time)
 
     assert embedding.shape == (batch_size, embed_dim)
 
@@ -32,7 +34,8 @@ def test_known_values_at_time_zero():
     embed_dim = 128
     time = torch.zeros(batch_size)  # t = 0
 
-    embedding = get_time_embedding(embed_dim, time)
+    time_encoder = SinusoidalTimeEncoder(embed_dim)
+    embedding = time_encoder(time)
 
     # Expected pattern for t=0: sin(0)=0, cos(0)=1 -> [0, 1, 0, 1, ...]
     half_dim = embed_dim // 2
@@ -49,10 +52,10 @@ def test_known_values_at_time_one():
     embed_dim = 4
     time = torch.ones(batch_size)
 
-    embedding = get_time_embedding(embed_dim, time, max_position=10000)
+    time_encoder = SinusoidalTimeEncoder(embed_dim)
+    embedding = time_encoder(time)
 
     expected_row = torch.tensor([-0.3056, 0.8415, -0.9522, 0.5403])
     expected_embedding = expected_row.unsqueeze(0).expand((batch_size, -1))
-
     # Use torch.allclose for safe floating-point comparison
     assert torch.allclose(embedding, expected_embedding, atol=1e-3)
