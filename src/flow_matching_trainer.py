@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 from torch.nn import Module
 
-from flow_matching_toy.model.time_embedding import get_time_embedding
+from flow_matching_toy.model.time_encoder import get_time_embedding
 from flow_matching_toy.dataset.fashion_mnist import get_fashion_mnist_dataloaders
 
 

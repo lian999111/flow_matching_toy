@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from flow_matching_toy.model.time_embedding import get_time_embedding
+from flow_matching_toy.model.time_encoder import get_time_embedding
 
 
 class FCLayer(nn.Module):
