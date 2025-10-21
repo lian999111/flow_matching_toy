@@ -18,6 +18,8 @@ class FlowMatchingModel(pl.LightningModule):
         model_cfg: Dict[str, Any],
         cond_encoder_cfg: Dict[str, Any],
         time_encoder_cfg: Dict[str, Any],
+        condition_drop_prob,
+        null_condition,
         learning_rate: float = 1e-3,
     ):
         """
@@ -43,19 +45,29 @@ class FlowMatchingModel(pl.LightningModule):
         self.condition_encoder = torch.nn.Embedding(**cond_encoder_cfg)
         self.time_encoder = SinusoidalTimeEncoder(**time_encoder_cfg)
 
+        # Still store hyperparams manually for readability
+        self.condition_drop_prob = condition_drop_prob
+        self.null_condition = null_condition
+        self.learning_rate = learning_rate
+
     def forward(self, x_t: torch.Tensor, condition: torch.Tensor, time: torch.Tensor):
         cond_emb = self.condition_encoder(condition)
-        # TODO: Think of a better way to config this
         time_emb = self.time_encoder(time)
         # Include time embedding as part of condition embedding
         cond_emb = torch.cat([time_emb, cond_emb], dim=1)
         pred_velocity = self.model(x_t, cond_emb)
         return pred_velocity
 
-    def step(self, batch: torch.Tensor):
+    def step(self, batch: torch.Tensor, enable_condition_drop: bool):
         """Compute the loss on one batch containing target and condition."""
         x_target, condition = batch
         batch_size = x_target.shape[0]
+
+        # Classifier-free guidance training
+        # Replace some condition with null to train the model unconditionally
+        if enable_condition_drop:
+            uncond_mask = torch.rand(batch_size, device=x_target.device) < self.condition_drop_prob
+            condition[uncond_mask] = self.null_condition
 
         random_noise = torch.randn_like(x_target)
         time = torch.rand(batch_size, device=x_target.device)
@@ -72,18 +84,17 @@ class FlowMatchingModel(pl.LightningModule):
 
     def training_step(self, batch: torch.Tensor, batch_idx: int):
         """Train one step with each batch containing target and condition."""
-        # TODO: Add Classifier-Free Guidance
-        loss = self.step(batch)
+        loss = self.step(batch, enable_condition_drop=True)
         self.log("train_loss", loss, on_epoch=True)
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int):
         """Validate one step with each batch containing target and condition."""
-        val_loss = self.step(batch)
+        val_loss = self.step(batch, enable_condition_drop=True)
         self.log("val_loss", val_loss, on_epoch=True)
 
     def configure_optimizers(self):
-        optim = torch.optim.AdamW(self.parameters(), lr=self.hparams.learning_rate)
+        optim = torch.optim.AdamW(self.parameters(), lr=self.learning_rate)
         return optim
 
 
@@ -112,7 +123,12 @@ def train_flow_matching(debug=False):
     ), "Condition embedding dimensions don't match."
 
     flow_match_model = FlowMatchingModel(
-        model_cfg=model_cfg, cond_encoder_cfg=cond_encoder_cfg, time_encoder_cfg=time_encoder_cfg, learning_rate=1e-3
+        model_cfg=model_cfg,
+        cond_encoder_cfg=cond_encoder_cfg,
+        time_encoder_cfg=time_encoder_cfg,
+        condition_drop_prob=0.1,
+        null_condition=10,
+        learning_rate=1e-3,
     )
 
     if debug:
@@ -123,6 +139,7 @@ def train_flow_matching(debug=False):
     trainer.fit(flow_match_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 
     return flow_match_model
+
 
 if __name__ == "__main__":
     train_flow_matching(debug=False)
